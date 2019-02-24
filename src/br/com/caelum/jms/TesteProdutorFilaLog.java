@@ -2,16 +2,16 @@ package br.com.caelum.jms;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
+import javax.jms.DeliveryMode;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageListener;
+import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-public class TesteConsumidorFila {
+public class TesteProdutorFilaLog {
 
 	public static void main(String[] args) throws NamingException, JMSException {
 
@@ -23,17 +23,13 @@ public class TesteConsumidorFila {
 		
 		Session session  = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		
-		Destination fila  = (Destination) context.lookup("DLQ");
-		MessageConsumer consumer = session.createConsumer(fila);
+		Destination log  = (Destination) context.lookup("log");
+		MessageProducer producer = session.createProducer(log);
 		
-		consumer.setMessageListener(new MessageListener() {
-			
-			public void onMessage(Message message) {
-				System.out.println(message.toString());
-				
-			}
-		});
+		Message message = session.createTextMessage("INF");
+		producer.send(message , DeliveryMode.NON_PERSISTENT, 3 , 5000);
 		
+		session.close();
 		connection.close();
 		context.close();
 	}

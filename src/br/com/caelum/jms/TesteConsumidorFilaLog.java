@@ -8,10 +8,11 @@ import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageListener;
 import javax.jms.Session;
+import javax.jms.TextMessage;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-public class TesteConsumidorFila {
+public class TesteConsumidorFilaLog {
 
 	public static void main(String[] args) throws NamingException, JMSException {
 
@@ -23,17 +24,20 @@ public class TesteConsumidorFila {
 		
 		Session session  = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		
-		Destination fila  = (Destination) context.lookup("DLQ");
-		MessageConsumer consumer = session.createConsumer(fila);
+		Destination log  = (Destination) context.lookup("log");
+		MessageConsumer consumer = session.createConsumer(log);
 		
 		consumer.setMessageListener(new MessageListener() {
 			
 			public void onMessage(Message message) {
-				System.out.println(message.toString());
-				
+				TextMessage textMessage = (TextMessage) message;
+				try {
+					System.out.println(textMessage.getText());
+				} catch (JMSException e) {
+					e.printStackTrace();
+				}
 			}
 		});
-		
 		connection.close();
 		context.close();
 	}
