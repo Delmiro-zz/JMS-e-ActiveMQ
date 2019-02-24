@@ -25,7 +25,8 @@ public class TesteProdutorTopic {
 		Destination topic  = (Destination) context.lookup("topicExemplo");
 		MessageProducer producer = session.createProducer(topic);
 		
-		Message message = session.createTextMessage("<pedido><id>1011</id></pedido>");
+		Message message = session.createTextMessage("<pedido><id>1011</id><atributo>false</atributo></pedido>");
+		message.setBooleanProperty("atributo", false);
 		producer.send(message);
 		
 		session.close();
