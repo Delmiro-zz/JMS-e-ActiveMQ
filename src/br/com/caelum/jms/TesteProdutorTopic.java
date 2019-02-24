@@ -5,14 +5,12 @@ import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageListener;
+import javax.jms.MessageProducer;
 import javax.jms.Session;
-import javax.jms.TextMessage;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-public class TesteConsumidor {
+public class TesteProdutorTopic {
 
 	public static void main(String[] args) throws NamingException, JMSException {
 
@@ -24,21 +22,13 @@ public class TesteConsumidor {
 		
 		Session session  = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		
-		Destination fila  = (Destination) context.lookup("xpto");
-		MessageConsumer consumer = session.createConsumer(fila);
+		Destination topic  = (Destination) context.lookup("topicExemplo");
+		MessageProducer producer = session.createProducer(topic);
 		
-		consumer.setMessageListener(new MessageListener() {
-			
-			public void onMessage(Message message) {
-				TextMessage textMessage = (TextMessage) message;
-				try {
-					System.out.println(textMessage.getText());
-				} catch (JMSException e) {
-					e.printStackTrace();
-				}
-			}
-		});
+		Message message = session.createTextMessage("<pedido><id>1011</id></pedido>");
+		producer.send(message);
 		
+		session.close();
 		connection.close();
 		context.close();
 	}

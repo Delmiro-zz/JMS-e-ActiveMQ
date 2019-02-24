@@ -2,15 +2,17 @@ package br.com.caelum.jms;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
-import javax.jms.MessageProducer;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageListener;
 import javax.jms.Session;
+import javax.jms.TextMessage;
+import javax.jms.Topic;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-public class TesteProdutor {
+public class TesteConsumidorTopicEstoque {
 
 	public static void main(String[] args) throws NamingException, JMSException {
 
@@ -18,18 +20,25 @@ public class TesteProdutor {
 
 		ConnectionFactory factory = (ConnectionFactory) context.lookup("ConnectionFactory");
 		Connection connection = factory.createConnection();
+		connection.setClientID("comercial");
 		connection.start();
 		
 		Session session  = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+		Topic consumerTopic  = (Topic) context.lookup("topicExemplo");
+		MessageConsumer consumer = session.createDurableSubscriber(consumerTopic, "assinatura");
 		
-		Destination fila  = (Destination) context.lookup("xpto");
-		MessageProducer producer = session.createProducer(fila);
+		consumer.setMessageListener(new MessageListener() {
+			
+			public void onMessage(Message message) {
+				TextMessage textMessage = (TextMessage) message;
+				try {
+					System.out.println(textMessage.getText());
+				} catch (JMSException e) {
+					e.printStackTrace();
+				}
+			}
+		});
 		
-		for (int i = 0; i < 100; i++) {
-			Message message = session.createTextMessage("<pedido><id>" + i + "</id></pedido>");
-			producer.send(message);
-		}
-		session.close();
 		connection.close();
 		context.close();
 	}
