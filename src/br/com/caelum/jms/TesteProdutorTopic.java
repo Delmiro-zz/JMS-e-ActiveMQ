@@ -10,6 +10,9 @@ import javax.jms.Session;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import br.com.caelum.modelo.Pedido;
+import br.com.caelum.modelo.PedidoFactory;
+
 public class TesteProdutorTopic {
 
 	public static void main(String[] args) throws NamingException, JMSException {
@@ -25,7 +28,10 @@ public class TesteProdutorTopic {
 		Destination topic  = (Destination) context.lookup("topicExemplo");
 		MessageProducer producer = session.createProducer(topic);
 		
-		Message message = session.createTextMessage("<pedido><id>1011</id><atributo>false</atributo></pedido>");
+		Pedido pedido = new PedidoFactory().geraPedidoComValores();
+		
+		Message message = session.createObjectMessage(pedido);
+		
 		message.setBooleanProperty("atributo", false);
 		producer.send(message);
 		
